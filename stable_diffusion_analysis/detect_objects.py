@@ -62,7 +62,7 @@ def detect_generated_objects(triples:List[Tuple[str,str,str]], model_name:str):
 			"femi_prompt": feminine[int(prompt_index)],
 			"masc_prompt": masculine[int(prompt_index)],
 		}
-		print(f"Processing Prompt {prompt_index} for female")
+		print(f"Processing Prompt {prompt_index} for feminine")
 		for image in os.listdir(prompt_path):
 			image_path = os.path.join(prompt_path, image)
 			image = Image.open(image_path)
