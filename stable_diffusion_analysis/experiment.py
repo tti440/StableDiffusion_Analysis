@@ -185,33 +185,27 @@ def bias_dependency_plot(dependency_bias_score):
 		ax.set_title(f"Bias Score of Implicitly Independent Dependencies: {model}")
 		plt.savefig(f"{model}_implicit_independent_bias_score.png")
 
-def main(model_names:Union[str | List[str]], num_samples:int, torch_dtype:str, triples_json:str):
-	if not os.path.exists("images"):
-		os.makedirs("images")
-	if isinstance(model_names, str):
-		model_names = [model_names]
+def main(model_names:str, num_samples:int, torch_dtype:str, triples_json:str):
+	if not os.path.exists("stable_diffusion_analysis/images"):
+		os.makedirs("stable_diffusion_analysis/images")
+	model_names = model_names.split(", ")
 	triples = json.load(open(triples_json))
-	#similarity = all_similarities(triples, model_names, torch_dtype, num_samples)
-	#detect_objects_results = all_detect_objects(triples, model_names)
-	detect_objects_results = {
-		"SD1.4": pickle.load(open("detect_object_SD1.4_results.pkl", "rb")),
-		"SD2.0": pickle.load(open("detect_object_SD2.0_results.pkl", "rb")),
-		"SD2.1": pickle.load(open("detect_object_SD2.1_results.pkl", "rb"))
-	}
+	similarity = all_similarities(triples, model_names, torch_dtype, num_samples)
+	detect_objects_results = all_detect_objects(triples, model_names)
 	dependencies, guided_objects = all_dependencies(model_names, num_samples)
 	dependency_bias_score = bias_score_dependencies(dependencies)
-	#similarity_matrix(similarity)
+	similarity_matrix(similarity)
 	figure_cooccurrence = get_figure_cooccurrence(detect_objects_results)
 	cooccurrence_similarity(figure_cooccurrence)
 	top10_most_frequent_objects(dependencies)
 	bias_dependency_plot(dependency_bias_score)
 	with open("all_guided_objects.json", "w") as f:
 		json.dump(guided_objects, f)
-	
+
 # argument - model_names, num_samples, torch_dtype, triples.json(List[List[str]]) 
 if __name__ == "__main__":
 	argparser = argparse.ArgumentParser()
-	argparser.add_argument("--model_names", type=str, default=["SD1.4", "SD2.0", "SD2.1"])
+	argparser.add_argument("--model_names", type=str, default="SD1.4, SD2.0, SD2.1")
 	argparser.add_argument("--num_samples", type=int, default=1)
 	argparser.add_argument("--torch_dtype", type=str, default=torch.float16)
 	argparser.add_argument("--triples_json", type=str, default="example.json")

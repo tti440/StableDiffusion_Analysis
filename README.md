@@ -90,11 +90,11 @@ pip install -e .
 Example usage of the `experiment.py` script is provided below.
 Run the experiment with:
 ```bash
-python experiment.py --num_samples=3
+python stable_diffusion_analysis/experiment.py --num_samples=3
 ```
 #### **Arguments:**
 ```python
-argparser.add_argument("--model_names", type=str, default=["SD1.4", "SD2.0", "SD2.1"])
+argparser.add_argument("--model_names", type=str, default="SD1.4, SD2.0, SD2.1")
 argparser.add_argument("--num_samples", type=int, default=1)
 argparser.add_argument("--torch_dtype", type=str, default="torch.float16")
 argparser.add_argument("--triples_json", type=str, default="example.json")

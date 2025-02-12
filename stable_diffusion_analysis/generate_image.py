@@ -6,8 +6,8 @@ from models import generate_img, generate_img_with_heatmap, get_model
 import spacy 
 import pickle
 
-if not os.path.exists("images"):
-	os.makedirs("images")
+if not os.path.exists("stable_diffusion_analysis/images"):
+	os.makedirs("stable_diffusion_analysis/images")
 
 NLP = spacy.load("en_core_web_sm")
 
@@ -19,8 +19,8 @@ def generate_images(triples:List[Tuple[str,str,str]], model_name:str, torch_dtyp
 	if pipe is None:
 		pipe = get_model(model_name, torch_dtype)
 	pipe.to("cuda")
-	if not os.path.exists(f"images/{model_name}"):
-		os.makedirs(f"images/{model_name}")	
+	if not os.path.exists(f"stable_diffusion_analysis/images/{model_name}"):
+		os.makedirs(f"stable_diffusion_analysis/images/{model_name}")	
 	if with_heatmap:
 		with torch.no_grad():
 			heatmaps = defaultdict(dict)
@@ -37,25 +37,25 @@ def generate_images(triples:List[Tuple[str,str,str]], model_name:str, torch_dtyp
 					"feminine": femi_heatmaps,
 					"masculine": masc_heatmaps
 				}
-				if not os.path.exists(f"images/{model_name}/neutral"):
-					os.makedirs(f"images/{model_name}/neutral")
-				if not os.path.exists(f"images/{model_name}/feminine"):
-					os.makedirs(f"images/{model_name}/feminine")
-				if not os.path.exists(f"images/{model_name}/masculine"):
-					os.makedirs(f"images/{model_name}/masculine")
+				if not os.path.exists(f"stable_diffusion_analysis/images/{model_name}/neutral"):
+					os.makedirs(f"stable_diffusion_analysis/images/{model_name}/neutral")
+				if not os.path.exists(f"stable_diffusion_analysis/images/{model_name}/feminine"):
+					os.makedirs(f"stable_diffusion_analysis/images/{model_name}/feminine")
+				if not os.path.exists(f"stable_diffusion_analysis/images/{model_name}/masculine"):
+					os.makedirs(f"stable_diffusion_analysis/images/{model_name}/masculine")
 				
 				for j, img in enumerate(neutral_images):
-					if not os.path.exists(f"images/{model_name}/neutral/{i}"):
-						os.makedirs(f"images/{model_name}/neutral/{i}")
-					img.save(f"images/{model_name}/neutral/{i}/{j}.png")
+					if not os.path.exists(f"stable_diffusion_analysis/images/{model_name}/neutral/{i}"):
+						os.makedirs(f"stable_diffusion_analysis/images/{model_name}/neutral/{i}")
+					img.save(f"stable_diffusion_analysis/images/{model_name}/neutral/{i}/{j}.png")
 				for j, img in enumerate(feminine_images):
-					if not os.path.exists(f"images/{model_name}/feminine/{i}"):
-						os.makedirs(f"images/{model_name}/feminine/{i}")
-					img.save(f"images/{model_name}/feminine/{i}/{j}.png")
+					if not os.path.exists(f"stable_diffusion_analysis/images/{model_name}/feminine/{i}"):
+						os.makedirs(f"stable_diffusion_analysis/images/{model_name}/feminine/{i}")
+					img.save(f"stable_diffusion_analysis/images/{model_name}/feminine/{i}/{j}.png")
 				for j, img in enumerate(masculine_images):
-					if not os.path.exists(f"images/{model_name}/masculine/{i}"):
-						os.makedirs(f"images/{model_name}/masculine/{i}")
-					img.save(f"images/{model_name}/masculine/{i}/{j}.png")
+					if not os.path.exists(f"stable_diffusion_analysis/images/{model_name}/masculine/{i}"):
+						os.makedirs(f"stable_diffusion_analysis/images/{model_name}/masculine/{i}")
+					img.save(f"stable_diffusion_analysis/images/{model_name}/masculine/{i}/{j}.png")
 		with open(f"heatmap_{model_name}.pkl", "wb") as f:
 			pickle.dump(heatmaps, f)
 	else:
@@ -65,22 +65,22 @@ def generate_images(triples:List[Tuple[str,str,str]], model_name:str, torch_dtyp
 				neutral_images = generate_img(pipe, neutral, num_samples=num_samples)
 				feminine_images = generate_img(pipe, feminine, num_samples=num_samples)
 				masculine_images = generate_img(pipe, masculine, num_samples=num_samples)
-				if not os.path.exists(f"images/{model_name}/neutral"):
-					os.makedirs(f"images/{model_name}/neutral")
-				if not os.path.exists(f"images/{model_name}/feminine"):
-					os.makedirs(f"images/{model_name}/feminine")
-				if not os.path.exists(f"images/{model_name}/masculine"):
-					os.makedirs(f"images/{model_name}/masculine")
+				if not os.path.exists(f"stable_diffusion_analysis/images/{model_name}/neutral"):
+					os.makedirs(f"stable_diffusion_analysis/images/{model_name}/neutral")
+				if not os.path.exists(f"stable_diffusion_analysis/images/{model_name}/feminine"):
+					os.makedirs(f"stable_diffusion_analysis/images/{model_name}/feminine")
+				if not os.path.exists(f"stable_diffusion_analysis/images/{model_name}/masculine"):
+					os.makedirs(f"stable_diffusion_analysis/images/{model_name}/masculine")
 				
 				for j, img in enumerate(neutral_images):
-					if not os.path.exists(f"images/{model_name}/neutral/{i}"):
-						os.makedirs(f"images/{model_name}/neutral/{i}")
-					img.save(f"images/{model_name}/neutral/{i}.png")
+					if not os.path.exists(f"stable_diffusion_analysis/images/{model_name}/neutral/{i}"):
+						os.makedirs(f"stable_diffusion_analysis/images/{model_name}/neutral/{i}")
+					img.save(f"stable_diffusion_analysis/images/{model_name}/neutral/{i}.png")
 				for j, img in enumerate(feminine_images):
-					if not os.path.exists(f"images/{model_name}/feminine/{i}"):
-						os.makedirs(f"images/{model_name}/feminine/{i}")
-					img.save(f"images/{model_name}/feminine/{i}/{j}.png")
+					if not os.path.exists(f"stable_diffusion_analysis/images/{model_name}/feminine/{i}"):
+						os.makedirs(f"stable_diffusion_analysis/images/{model_name}/feminine/{i}")
+					img.save(f"stable_diffusion_analysis/images/{model_name}/feminine/{i}/{j}.png")
 				for j, img in enumerate(masculine_images):
-					if not os.path.exists(f"images/{model_name}/masculine/{i}"):
-						os.makedirs(f"images/{model_name}/masculine/{i}")
-					img.save(f"images/{model_name}/masculine/{i}/{j}.png")
+					if not os.path.exists(f"stable_diffusion_analysis/images/{model_name}/masculine/{i}"):
+						os.makedirs(f"stable_diffusion_analysis/images/{model_name}/masculine/{i}")
+					img.save(f"stable_diffusion_analysis/images/{model_name}/masculine/{i}/{j}.png")

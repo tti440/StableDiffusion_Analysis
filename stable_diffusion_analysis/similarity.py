@@ -19,6 +19,7 @@ NLP = spacy.load("en_core_web_sm")
 def all_similarities(triples: List[Tuple[str, str, str]], model_names:List[str] = ["SD1.4", "SD2.0", "SD2.1"], torch_dtype: torch.dtype = torch.float16, num_samples: int = 1, generate:bool = False, with_heatmap:bool = True):
 	similarities = {}
 	for model_name in model_names:
+		print(model_name)
 		similarities[model_name] = calc_similarities(triples, model_name, torch_dtype, num_samples, generate, with_heatmap)
      
 	return similarities

@@ -285,19 +285,17 @@ dependencies:
       - blis==1.2.0
       - catalogue==2.0.10
       - click==8.1.8
-      - clip==1.0
       - cloudpathlib==0.20.0
       - confection==0.1.5
       - cymem==2.0.11
       - defusedxml==0.7.1
       - diffusers==0.21.2
-      - en-core-web-sm==3.8.0
       - fairscale==0.4.4
       - fastapi==0.115.8
       - ffmpy==0.5.0
       - ftfy==6.3.1
-      - gradio==5.15.0
-      - gradio-client==1.7.0
+      - gradio
+      - gradio-client
       - h11==0.14.0
       - httpcore==1.0.7
       - httpx==0.28.1
@@ -334,7 +332,6 @@ dependencies:
       - rich==13.9.4
       - ruff==0.9.5
       - safehttpx==0.1.6
-      - sam-2==1.0
       - scikit-image==0.25.1
       - semantic-version==2.10.0
       - shellingham==1.5.4
@@ -352,9 +349,6 @@ dependencies:
       - timm==0.4.12
       - tokenizers==0.13.3
       - tomlkit==0.13.2
-      - torch==2.5.1+cu121
-      - torchaudio==2.5.1+cu121
-      - torchvision==0.20.1+cu121
       - transformers==4.30.2
       - typeguard==4.4.1
       - typer==0.15.1

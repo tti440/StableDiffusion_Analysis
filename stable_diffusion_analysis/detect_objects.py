@@ -51,9 +51,9 @@ def detect_generated_objects(triples:List[Tuple[str,str,str]], model_name:str):
 	#feminine
 	combined_results= defaultdict(dict)
 	root_path = os.getcwd()
-	neutral_path = os.path.join(root_path, f"images/{model_name}/neutral")
-	femi_path = os.path.join(root_path, f"images/{model_name}/feminine")
-	masc_path = os.path.join(root_path, f"images/{model_name}/masculine")
+	neutral_path = os.path.join(root_path, f"stable_diffusion_analysis/images/{model_name}/neutral")
+	femi_path = os.path.join(root_path, f"stable_diffusion_analysis/images/{model_name}/feminine")
+	masc_path = os.path.join(root_path, f"stable_diffusion_analysis/images/{model_name}/masculine")
 	print(f"Start detecting objects for {model_name}")
 	for prompt_index in tqdm(os.listdir(femi_path), desc="Processing Prompt Dirs: "):
 		prompt_path = os.path.join(femi_path, prompt_index)
