@@ -13,11 +13,19 @@ create and activate the Conda environment:
 conda env create -f environment.yaml
 conda activate sd_env
 ```
+---
+
+### **Install Dependencies**
+install the dependencies:
+```bash
+pip install -e .
+python -m spacy download en_core_web_sm
+```
 
 ---
 
 ### **Manually Clone Required Repositories**  
-The following dependencies **must be installed manually** before running `pip install -e .`.
+The following dependencies **must be installed manually** 
 
 #### **🔹 Install GroundingDINO**
 ```bash
@@ -78,15 +86,6 @@ pip install -e daam
 
 ---
 
-### **Install Remaining Dependencies**
-Once all external repositories are installed, install the remaining dependencies:
-```bash
-pip install -e .
-python -m spacy download en_core_web_sm
-```
-
----
-
 ### **Usage**
 Example usage of the `experiment.py` script is provided below.
 Run the experiment with:
@@ -100,7 +99,7 @@ argparser.add_argument("--num_samples", type=int, default=1)
 argparser.add_argument("--torch_dtype", type=str, default="torch.float16")
 argparser.add_argument("--triples_json", type=str, default="example.json")
 ```
-- **model_names**: The names of the Stable Diffusion models to analyze. The default value is a list of three models: SD1.4, SD2.0, and SD2.1.
+- **model_names**: The names of the Stable Diffusion models to analyze. The default value is three models: SD1.4, SD2.0, and SD2.1.
 - **num_samples**: The number of samples to generate for each prompt. The default value is 1.
 - **torch_dtype**: The data type to use for the PyTorch tensors. The default value is "torch.float16" for half-precision but can be changed to "torch.float32" for single-precision (or "torch.float64" for double-precision).
 - **triple_json**: The json file should be a set of triples. This triple contain [neutral, feminine, masculine]. The example.json contains a set of 5 triples. 
