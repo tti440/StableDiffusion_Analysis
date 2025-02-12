@@ -82,6 +82,7 @@ pip install -e daam
 Once all external repositories are installed, install the remaining dependencies:
 ```bash
 pip install -e .
+python -m spacy download en_core_web_sm
 ```
 
 ---
