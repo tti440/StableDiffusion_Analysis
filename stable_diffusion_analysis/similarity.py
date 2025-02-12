@@ -27,9 +27,9 @@ def all_similarities(triples: List[Tuple[str, str, str]], model_names:List[str] 
 def calc_similarities(triples: List[Tuple[str, str, str]], model_name:str, torch_dtype: torch.dtype, num_samples: int, generate:bool, with_heatmap:bool):
 	pipe = get_model(model_name, torch_dtype)
 	pipe.to("cuda")
-	if not os.path.exists(f"images/{model_name}") or generate:
+	if not os.path.exists(f"stable_diffusion_analysis/images/{model_name}") or generate:
 		generate_images(triples, model_name, torch_dtype, num_samples, pipe=pipe, with_heatmap=with_heatmap)
-	path = f"images/{model_name}"
+	path = f"stable_diffusion_analysis/images/{model_name}"
 	with torch.no_grad():
 		similarities = defaultdict(dict)
 		for i, triple in enumerate(triples):
