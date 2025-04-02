@@ -9,6 +9,7 @@ from scipy.stats import chi2_contingency
 import pickle
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+
 _SAM2 = None
 _RAM = None
 _RAM_TRANSFORM = None
@@ -32,13 +33,13 @@ def get_dino():
 		_DINO = load_dino()
 	return _DINO
 
-def all_detect_objects(triples: List[Tuple[str, str, str]], model_names:List[str] = ["SD1.4", "SD2.0", "SD2.1"]):
+def all_detect_objects(dataset_name:str, triples: List[Tuple[str, str, str]], model_names:List[str] = ["SD1.4", "SD2.0", "SD2.1"]):
 	combined_results = {}
 	for model_name in model_names:
-		combined_results[model_name] = detect_generated_objects(triples, model_name)
+		combined_results[model_name] = detect_generated_objects(dataset_name, triples, model_name)
 	return combined_results
 
-def detect_generated_objects(triples:List[Tuple[str,str,str]], model_name:str):
+def detect_generated_objects(dataset_name:str, triples:List[Tuple[str,str,str]], model_name:str):
 	SAM2 = get_sam2()
 	RAM, RAM_TRANSFORM = get_ram()
 	DINO = get_dino()
@@ -51,10 +52,10 @@ def detect_generated_objects(triples:List[Tuple[str,str,str]], model_name:str):
 	#feminine
 	combined_results= defaultdict(dict)
 	root_path = os.getcwd()
-	neutral_path = os.path.join(root_path, f"stable_diffusion_analysis/images/{model_name}/neutral")
-	femi_path = os.path.join(root_path, f"stable_diffusion_analysis/images/{model_name}/feminine")
-	masc_path = os.path.join(root_path, f"stable_diffusion_analysis/images/{model_name}/masculine")
-	print(f"Start detecting objects for {model_name}")
+	neutral_path = os.path.join(root_path, f"stable_diffusion_analysis/images/{model_name}/{dataset_name}/neutral")
+	femi_path = os.path.join(root_path, f"stable_diffusion_analysis/images/{model_name}/{dataset_name}/feminine")
+	masc_path = os.path.join(root_path, f"stable_diffusion_analysis/images/{model_name}/{dataset_name}/masculine")
+	print(f"Start detecting objects for {model_name} {dataset_name}")
 	for prompt_index in tqdm(os.listdir(femi_path), desc="Processing Prompt Dirs: "):
 		prompt_path = os.path.join(femi_path, prompt_index)
 		images = []
@@ -62,6 +63,7 @@ def detect_generated_objects(triples:List[Tuple[str,str,str]], model_name:str):
 			"femi_prompt": feminine[int(prompt_index)],
 			"masc_prompt": masculine[int(prompt_index)],
 		}
+		print("\n")
 		print(f"Processing Prompt {prompt_index} for feminine")
 		for image in os.listdir(prompt_path):
 			image_path = os.path.join(prompt_path, image)
@@ -105,7 +107,7 @@ def detect_generated_objects(triples:List[Tuple[str,str,str]], model_name:str):
 		combined_results[prompt_index]["femi_masks"] = femi_masks
 		combined_results[prompt_index]["masc_masks"] = masc_masks
 		combined_results[prompt_index]["bias_scores"] = bias_scores
-	with open(f"detect_object_{model_name}_results.pkl", "wb") as f:
+	with open(f"detect_object_{model_name}_{dataset_name}_results.pkl", "wb") as f:
 		pickle.dump(combined_results, f)
 	return combined_results
 	
@@ -114,33 +116,40 @@ def detect_generated_objects(triples:List[Tuple[str,str,str]], model_name:str):
 def count_objects(nouns1: List[str], nouns2: List[str]):
 	femi_count = defaultdict(int)
 	masc_count = defaultdict(int)
+
 	for nouns in nouns1:
 		for noun in nouns:
-			if noun in femi_count:
-				femi_count[noun] += 1
-			else:
-				femi_count[noun] = 1
-			masc_count[noun] = 0
+			femi_count[noun] += 1
+
 	for nouns in nouns2:
 		for noun in nouns:
-			if noun in masc_count:
-				masc_count[noun] += 1
-			else:
-				masc_count[noun] = 1
-			femi_count[noun] = 0
+			masc_count[noun] += 1
+
+	all_keys = set(femi_count.keys()).union(masc_count.keys())
+	for key in all_keys:
+		femi_count.setdefault(key, 0)
+		masc_count.setdefault(key, 0)
 	return femi_count, masc_count
+
 
 def compute_co_occurrence_similarity(nouns1: List[str], nouns2: List[str]):
 	counts1, counts2 = count_objects(nouns1, nouns2)
-	tensor1 = torch.tensor(list(counts1.values()), dtype=torch.float32)
-	tensor2 = torch.tensor(list(counts2.values()), dtype=torch.float32)
+	all_keys = sorted(set(counts1.keys()).union(counts2.keys()))
+	tensor1 = torch.tensor([counts1[k] for k in all_keys], dtype=torch.float32)
+	tensor2 = torch.tensor([counts2[k] for k in all_keys], dtype=torch.float32)
 	tensor1 = F.normalize(tensor1, p=2, dim=0)
 	tensor2 = F.normalize(tensor2, p=2, dim=0)
+	
 	return F.cosine_similarity(tensor1.unsqueeze(0), tensor2.unsqueeze(0)).item()
+
 
 def chi_square_test(nouns1: List[str], nouns2: List[str]):
 	counts1, counts2 = count_objects(nouns1, nouns2)
-	contingency_table = [list(counts1.values()), list(counts2.values())]
+	all_keys = sorted(set(counts1.keys()).union(counts2.keys()))
+	#prevent zero in the table
+	tensor1 = torch.tensor([counts1[k]+1 for k in all_keys], dtype=torch.float32)
+	tensor2 = torch.tensor([counts2[k]+1 for k in all_keys], dtype=torch.float32)
+	contingency_table = [list(tensor1), list(tensor2)]
 	chi2, p_value, _, _ = chi2_contingency(contingency_table)
 	return chi2, p_value
 
@@ -152,13 +161,14 @@ def bias_score(nouns1: Union[List[str] | dict[str,int]], nouns2: Union[List[str]
 		bias_score[noun] = nouns1[noun] / (nouns1[noun] + nouns2[noun])
 	return bias_score
 	
-def get_figure_cooccurrence(results:dict):
+def get_figure_cooccurrence(dataset_name:str, results:dict, output_dir:str):
 	significant_objects = []
-	cos_sim_nf = 0
-	cos_sim_nm = 0
 	bias_total = defaultdict(list[float, int])
 	all_results = defaultdict(dict)
 	for model, result in results.items():
+		cos_sim_nf = 0
+		cos_sim_nm = 0
+		count = 0
 		for prompt_idx, value in result.items():
 			femi_object = value["femi_objects"]
 			masc_object = value["masc_objects"]
@@ -167,6 +177,7 @@ def get_figure_cooccurrence(results:dict):
 			cos_sim = value["cos_sim_objects"]
 			cos_sim_nf += cos_sim['neutral_feminine']
 			cos_sim_nm += cos_sim['neutral_masculine']
+			count += 1
 			if p_value < 0.05:
 				significant_objects.append({
 					"prompt_idx": prompt_idx,
@@ -188,10 +199,10 @@ def get_figure_cooccurrence(results:dict):
 		#extract top10 and bottom 10 in bar chart
 		#show the score of bias in bar chart
 		# Adding "..." separator with a very small height
-		top_labels = [label for label, score in bias_score[:10]]
-		top_scores = [score for label, score in bias_score[:10]]
-		bottom_labels = [label for label, score in bias_score[-10:][::-1]]
-		bottom_scores = [score for label, score in bias_score[-10:][::-1]]
+		top_labels = [label for label, score in bias_score[:10] if score >= 0.5]
+		top_scores = [score for label, score in bias_score[:10] if score >= 0.5]
+		bottom_labels = [label for label, score in bias_score[-10:] if score < 0.5]
+		bottom_scores = [score for label, score in bias_score[-10:] if score < 0.5]
 
 		labels = top_labels + ["..."] + bottom_labels
 		values = top_scores + [0.001] + bottom_scores
@@ -202,8 +213,9 @@ def get_figure_cooccurrence(results:dict):
 		bars += ax.bar(["..."], [0.001], color="white")
 		bars += ax.bar(bottom_labels, bottom_scores, color="red", alpha=0.75)
 		# Making the "..." bar invisible
-		bars[10].set_color("white")
-		bars[10].set_edgecolor("white")
+		space_index = labels.index("...")
+		bars[space_index].set_color("white")
+		bars[space_index].set_edgecolor("white")
 
 		# Adding text annotations on bars
 		for bar, value in zip(bars, values):
@@ -214,12 +226,12 @@ def get_figure_cooccurrence(results:dict):
 		ax.axhline(y=0.5, color='green', linestyle='dashed')  # Reference line at 0.5
 		ax.set_ylabel("BS(o)")
 		ax.set_xticklabels(labels, rotation=20, ha="right")
-		ax.set_title(f"Bias Score: {model}")
-		#save
-		plt.savefig(f"{model}_bias_score.png")
+		ax.set_title(f"Bias Score: {model} on {dataset_name}")
+		#save/
+		plt.savefig(f"stable_diffusion_analysis/{output_dir}/{model}_{dataset_name}_bias_score.png")
 
-		final_cos_sim_nf = cos_sim_nf / len(results)
-		final_cos_sim_nm = cos_sim_nm / len(results)
+		final_cos_sim_nf = cos_sim_nf / count
+		final_cos_sim_nm = cos_sim_nm / count
 		all_results[model] = {
 			"significant_objects": significant_objects,
 			"final_cos_sim_nf": final_cos_sim_nf,

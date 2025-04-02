@@ -16,20 +16,20 @@ CLIP_PROCESSOR = CLIPImageProcessor.from_pretrained("openai/clip-vit-base-patch1
 DINO = torch.hub.load('facebookresearch/dino:main', 'dino_vitb16')
 NLP = spacy.load("en_core_web_sm")
 
-def all_similarities(triples: List[Tuple[str, str, str]], model_names:List[str] = ["SD1.4", "SD2.0", "SD2.1"], torch_dtype: torch.dtype = torch.float16, num_samples: int = 1, generate:bool = False, with_heatmap:bool = True):
+def all_similarities(dataset_name:str, triples: List[Tuple[str, str, str]], model_names:List[str] = ["SD1.4", "SD2.0", "SD2.1"], torch_dtype: torch.dtype = torch.float16, num_samples: int = 1, generate:bool = False, with_heatmap:bool = True):
 	similarities = {}
 	for model_name in model_names:
 		print(model_name)
-		similarities[model_name] = calc_similarities(triples, model_name, torch_dtype, num_samples, generate, with_heatmap)
+		similarities[model_name] = calc_similarities(dataset_name, triples, model_name, torch_dtype, num_samples, generate, with_heatmap)
      
 	return similarities
 
-def calc_similarities(triples: List[Tuple[str, str, str]], model_name:str, torch_dtype: torch.dtype, num_samples: int, generate:bool, with_heatmap:bool):
+def calc_similarities(dataset_name:str, triples: List[Tuple[str, str, str]], model_name:str, torch_dtype: torch.dtype, num_samples: int, generate:bool, with_heatmap:bool):
 	pipe = get_model(model_name, torch_dtype)
 	pipe.to("cuda")
-	if not os.path.exists(f"stable_diffusion_analysis/images/{model_name}") or generate:
-		generate_images(triples, model_name, torch_dtype, num_samples, pipe=pipe, with_heatmap=with_heatmap)
-	path = f"stable_diffusion_analysis/images/{model_name}"
+	path = f"stable_diffusion_analysis/images/{model_name}/{dataset_name}"
+	if not os.path.exists(path) or generate:
+		generate_images(dataset_name, triples, model_name, torch_dtype, num_samples, pipe=pipe, with_heatmap=with_heatmap)
 	with torch.no_grad():
 		similarities = defaultdict(dict)
 		for i, triple in enumerate(triples):
@@ -49,6 +49,7 @@ def calc_similarities(triples: List[Tuple[str, str, str]], model_name:str, torch
 			feminine_images = []
 			masculine_images = []
 			prompt_path = os.path.join(f"{path}/neutral", str(i))
+			assert os.path.exists(prompt_path)
 			for image in os.listdir(prompt_path):
 				image_path = os.path.join(prompt_path, image)
 				neutral_images.append(Image.open(image_path))
@@ -127,4 +128,5 @@ def calc_similarities(triples: List[Tuple[str, str, str]], model_name:str, torch
 	sum_similarities = {}
 	for key in similarities[0].keys():
 		sum_similarities[key] = sum([similarity[key] for similarity in similarities.values()]) / len(similarities)
+	torch.cuda.empty_cache()
 	return sum_similarities

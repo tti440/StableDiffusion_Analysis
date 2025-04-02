@@ -9,15 +9,16 @@ from tqdm import tqdm
 NLP = spacy.load("en_core_web_sm")
 THRESHOLD = 0.8
 
-def all_dependencies(model_names:List[str] = ["SD1.4", "SD2.0", "SD2.1"], num_samples:int = 1, threshold:float = 0.8):
+def all_dependencies(dataset_name:str, model_names:List[str] = ["SD1.4", "SD2.0", "SD2.1"], num_samples:int = 1, threshold:float = 0.8):
 	dependencies = {}
 	object_guidance = {}
 	for model_name in model_names:
-		dependencies[model_name], object_guidance[model_name] = image_dependencies(model_name, num_samples, threshold)
+		dependencies[model_name], object_guidance[model_name] = image_dependencies(dataset_name, model_name, num_samples, threshold)
 	return dependencies, object_guidance
-def image_dependencies(model_name: str, num_samples: int = 1, threshold: float = 0.8):
-	heatmap = pickle.load(open(f"heatmap_{model_name}.pkl", "rb"))
-	res = pickle.load(open(f"detect_object_{model_name}_results.pkl", "rb"))
+
+def image_dependencies(dataset_name:str, model_name: str, num_samples: int = 1, threshold: float = 0.8):
+	heatmap = pickle.load(open(f"{dataset_name}_heatmap_{model_name}.pkl", "rb"))
+	res = pickle.load(open(f"detect_object_{model_name}_{dataset_name}_results.pkl", "rb"))
 	dependencies = {
 		'explicit_guided': defaultdict(int),
   		'implicit_guided': defaultdict(int),

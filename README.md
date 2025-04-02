@@ -50,6 +50,8 @@ Then, return to the main directory:
 ```bash
 cd ../..
 ```
+Depending on your CUDA version and OS, you may encounter subprocess error while installing the dependencies. 
+If you do, please refer the original repo for the instructions. 
 **Reference:** [GroundingDINO Repository](https://github.com/IDEA-Research/GroundingDINO)
 
 ---
@@ -97,9 +99,39 @@ python stable_diffusion_analysis/experiment.py --num_samples=3
 argparser.add_argument("--model_names", type=str, default="SD1.4, SD2.0, SD2.1")
 argparser.add_argument("--num_samples", type=int, default=1)
 argparser.add_argument("--torch_dtype", type=str, default="torch.float16")
-argparser.add_argument("--triples_json", type=str, default="example.json")
+argparser.add_argument("--output_dir", type=str, default="output_data")
 ```
 - **model_names**: The names of the Stable Diffusion models to analyze. The default value is three models: SD1.4, SD2.0, and SD2.1.
 - **num_samples**: The number of samples to generate for each prompt. The default value is 1.
 - **torch_dtype**: The data type to use for the PyTorch tensors. The default value is "torch.float16" for half-precision but can be changed to "torch.float32" for single-precision (or "torch.float64" for double-precision).
-- **triple_json**: The json file should be a set of triples. This triple contain [neutral, feminine, masculine]. The example.json contains a set of 5 triples. 
+- **output_dir**: The directory where the plots will be saved. The default value is "output_data".
+
+### **Prompt Data Choice**
+Each prompt data should be stored in a json format and placed under **"datasets"** diretory in "stable_diffusion_analysis". The json file should contain a list of lists, where each inner list contains the prompts for neutral, feminine and masculine precisely in this order. Here is an example of coco.json:
+```json
+[
+	[
+		"a person at a table with a dog in a kitchen",
+		"a woman at a table with a dog in a kitchen",
+		"a man at a table with a dog in a kitchen"
+	],
+	[
+		" a corner of a city street with people jumping and riding skateboards",
+		" a corner of a city street with women jumping and riding skateboards",
+		" a corner of a city street with men jumping and riding skateboards"
+	]
+]
+```
+The dataset should be specified in **"dataset.py"** in the form of a dictionary. The keys of the dictionary are the names of the datasets, and the values are the paths to the json files. Here is an example of how to specify the dataset in **"dataset.py"**:
+```python
+DATASETS = {
+	"GCC": "gcc.json",
+	"COCO": "coco.json",
+	"TextCaps": "textcaps.json",
+	"Flickr30k": "flickr30k.json",
+	"Profession": "profession.json"
+}
+```
+The name will be used to save the output files.
+
+example.ipynb is provided to demonstrate results
