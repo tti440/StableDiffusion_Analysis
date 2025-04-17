@@ -30,12 +30,17 @@ The following dependencies **must be installed manually**
 #### **🔹 Install GroundingDINO**
 ```bash
 git clone https://github.com/IDEA-Research/GroundingDINO.git
-cd /GroundingDINO/groundingdino/models/GroundingDINO/csrc/MsDeformAttn
+cd GroundingDINO/groundingdino/models/GroundingDINO/csrc/MsDeformAttn
 sed -i 's/value.type()/value.scalar_type()/g' ms_deform_attn_cuda.cu
 sed -i 's/value.scalar_type().is_cuda()/value.is_cuda()/g' ms_deform_attn_cuda.cu
-cd /StableDiffusion_Analysis
+```
+
+Then, return to the main directory:
+```bash
+cd ../../../../../..
 pip install -e GroundingDINO
 ```
+
 ##### **Download GroundingDINO Weights**
 ```bash
 cd GroundingDINO
