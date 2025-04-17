@@ -30,6 +30,10 @@ The following dependencies **must be installed manually**
 #### **🔹 Install GroundingDINO**
 ```bash
 git clone https://github.com/IDEA-Research/GroundingDINO.git
+cd /GroundingDINO/groundingdino/models/GroundingDINO/csrc/MsDeformAttn.cu
+sed -i 's/value.type()/value.scalar_type()/g' ms_deform_attn_cuda.cu
+sed -i 's/value.scalar_type().is_cuda()/value.is_cuda()/g' ms_deform_attn_cuda.cu
+cd /StableDiffusion_Analysis
 pip install -e GroundingDINO
 ```
 ##### **Download GroundingDINO Weights**
@@ -53,7 +57,6 @@ cd ../..
 Depending on your CUDA version and OS, you may encounter subprocess error while installing the dependencies. 
 If you do, please refer the original repo for the instructions. 
 **Reference:** [GroundingDINO Repository](https://github.com/IDEA-Research/GroundingDINO)
-
 ---
 
 #### **🔹 Install SAM-2**
