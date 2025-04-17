@@ -34,5 +34,6 @@ setup(
         "accelerate",
         "imageio",
         "imageio[ffmpeg]",
+        "fairscale"
     ],
 )
