@@ -54,9 +54,11 @@ Then, return to the main directory:
 ```bash
 cd ../..
 ```
+
 Depending on your CUDA version and OS, you may encounter subprocess error while installing the dependencies. 
 If you do, please refer the original repo for the instructions. 
 **Reference:** [GroundingDINO Repository](https://github.com/IDEA-Research/GroundingDINO)
+
 ---
 
 #### **🔹 Install SAM-2**
